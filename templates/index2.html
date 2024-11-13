@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>자세 교정 모니터링</title>
+    <style>
+        body { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        h1 { color: #333; }
+        #status-display {
+            font-size: 24px;
+            margin: 20px 0;
+            padding: 10px 20px;
+            border-radius: 5px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .good { color: green; }
+        .bad { color: red; }
+        .detecting { color: gray; }
+        img { 
+            border: 3px solid #333;
+            border-radius: 10px;
+            margin-top: 20px;
+            max-width: 800px;
+            width: 100%;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const statusDisplay = document.getElementById('status-display');
+            const eventSource = new EventSource('/status_stream');
+            
+            eventSource.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                let statusClass = 'detecting';
+                if (data.status === '자세 좋음') statusClass = 'good';
+                else if (data.status === '자세 나쁨') statusClass = 'bad';
+                
+                statusDisplay.className = statusClass;
+                statusDisplay.textContent = 
+                    `상태: ${data.status} | 각도: ${data.angle}° | 정확도: ${data.confidence}%`;
+            };
+        });
+    </script>
+</head>
+<body>
+    <h1>실시간 자세 교정 모니터링</h1>
+    <div id="status-display" class="detecting">상태: 인식 중...</div>
+    <img src="/video_feed">
+</body>
+</html>
